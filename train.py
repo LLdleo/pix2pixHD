@@ -18,7 +18,7 @@ opt = TrainOptions().parse()
 iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
 if opt.continue_train:
     try:
-        start_epoch, epoch_iter = np.loadtxt(iter_path , delimiter=',', dtype=int)
+        start_epoch, epoch_iter = np.loadtxt(iter_path, delimiter=',', dtype=int)
     except:
         start_epoch, epoch_iter = 1, 0
     print('Resuming from epoch %d at iteration %d' % (start_epoch, epoch_iter))        
@@ -76,7 +76,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
         # calculate final loss scalar
         loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5
-        loss_G = loss_dict['G_GAN'] + loss_dict.get('G_GAN_Feat',0) + loss_dict.get('G_VGG',0)
+        loss_G = loss_dict['G_GAN'] + loss_dict.get('G_GAN_Feat', 0) + loss_dict.get('G_VGG', 0)
 
         ############### Backward Pass ####################
         # update generator weights

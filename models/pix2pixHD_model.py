@@ -123,6 +123,9 @@ class Pix2PixHDModel(BaseModel):
         # get edges from instance map
         if not self.opt.no_instance:
             inst_map = inst_map.data.cuda()
+            # aaa = inst_map[:, :,:,1:] != inst_map[:,:,:,:-1]
+            # print(aaa)
+            # print(type(aaa))
             edge_map = self.get_edges(inst_map)
             input_label = torch.cat((input_label, edge_map), dim=1)         
         input_label = Variable(input_label, volatile=infer)
@@ -261,11 +264,13 @@ class Pix2PixHDModel(BaseModel):
 
     def get_edges(self, t):
         edge = torch.cuda.ByteTensor(t.size()).zero_()
-        edge[:,:,:,1:] = edge[:,:,:,1:] | (t[:,:,:,1:] != t[:,:,:,:-1])
-        edge[:,:,:,:-1] = edge[:,:,:,:-1] | (t[:,:,:,1:] != t[:,:,:,:-1])
-        edge[:,:,1:,:] = edge[:,:,1:,:] | (t[:,:,1:,:] != t[:,:,:-1,:])
-        edge[:,:,:-1,:] = edge[:,:,:-1,:] | (t[:,:,1:,:] != t[:,:,:-1,:])
-        if self.opt.data_type==16:
+        print((t[:, :,:,1:] != t[:,:,:,:-1]).type_as(edge))
+        print(edge[:, :, :, 1:])
+        edge[:, :, :, 1:] = edge[:, :, :, 1:] | (t[:, :, :, 1:] != t[:, :, :, :-1]).type_as(edge)
+        edge[:, :, :, :-1] = edge[:, :, :, :-1] | (t[:, :, :, 1:] != t[:, :, :, :-1]).type_as(edge)
+        edge[:, :, 1:, :] = edge[:, :, 1:, :] | (t[:, :, 1:, :] != t[:, :, :-1, :]).type_as(edge)
+        edge[:, :, :-1, :] = edge[:, :, :-1, :] | (t[:, :, 1:, :] != t[:, :, :-1, :]).type_as(edge)
+        if self.opt.data_type == 16:
             return edge.half()
         else:
             return edge.float()
